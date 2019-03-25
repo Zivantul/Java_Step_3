@@ -1,0 +1,71 @@
+package Task3_BigTask;
+
+import java.util.ArrayList;
+
+public class Starter {
+    public static void main(String[] args) {
+
+        // create oranges
+        // for first box
+        Orange or = new Orange();
+        Orange or1 = new Orange();
+        Orange or2 = new Orange();
+        Orange or3 = new Orange();
+        ArrayList<Orange>  orng = new ArrayList<Orange>();
+
+        // for second box
+        Orange or5 = new Orange();
+        Orange or6 = new Orange();
+        ArrayList<Orange>  orng2 = new ArrayList<Orange>();
+
+
+        // create apples
+        Apple apl = new Apple();
+        Apple apl1 = new Apple();
+        ArrayList<Apple>  appl = new ArrayList<Apple>();
+
+
+        // first box and add oranges into it
+        Box <Orange> boxOfOrange = new Box <Orange>(orng);
+        boxOfOrange.addFruitToBox(or);
+        boxOfOrange.addFruitToBox(or1);
+        boxOfOrange.addFruitToBox(or2);
+        boxOfOrange.addFruitToBox(or3);
+        System.out.println(orng.toString());
+
+        // second box and add oranges into it
+        Box <Orange> boxOfOrange2 = new Box <Orange>(orng2);
+        boxOfOrange2.addFruitToBox(or5);
+        boxOfOrange2.addFruitToBox(or6);
+        System.out.println(orng2.toString());
+
+        // first box and add apples into it
+        Box <Apple> boxOfApple = new Box <Apple>(appl);
+        boxOfApple.addFruitToBox(apl);
+        boxOfApple.addFruitToBox(apl1);
+
+        // use getWeight Method
+        System.out.println("Weight of the box: " + boxOfOrange.getWeight());
+        System.out.println("Weight of the box: " + boxOfApple.getWeight());
+
+        // use compareBox method
+        System.out.println("The Boxes have the same weight? " + compareBox(boxOfOrange, boxOfApple));
+
+        // use unionBoxes method
+        boxOfOrange.unionBoxes(boxOfOrange2);
+        System.out.println(boxOfOrange);
+        System.out.println(boxOfOrange2);
+
+    }
+
+// Method to compare weights of two boxes
+    public static boolean compareBox (Box comparedBox1, Box comparedBox2) {
+        boolean compareStatus = false;
+
+        if (comparedBox1.getWeight() == comparedBox2.getWeight()) {
+            compareStatus = true;
+        }
+
+        return compareStatus;
+    }
+}
