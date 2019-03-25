@@ -1,0 +1,6 @@
+package Task3_BigTask;
+
+public class Orange extends Fruit {
+
+
+}

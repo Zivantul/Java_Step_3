@@ -1,0 +1,51 @@
+package Tasks_1and2;
+
+import java.util.ArrayList;
+
+public class MyArray <T extends Number> {
+    public T[] myArr;
+
+    public MyArray(T[] myArr) {
+        this.myArr = myArr;
+    }
+
+
+    /** method to print Array
+     *
+     */
+    public void printArray () {
+        System.out.print("{");
+        for (T value : this.myArr) {
+            System.out.print(" " + value + ";");
+        }
+        System.out.print("}");
+    }
+
+    /**
+     * method to replace elements
+     * @param firstReplace - place (! for users) of first element to replace
+     * @param secondReplace - place (! for users) of second element to replace
+     */
+    public void changeArr (int firstReplace, int secondReplace) {
+        try {
+            T curExp;
+
+            curExp = this.myArr[firstReplace-1];
+            this.myArr[firstReplace-1] = this.myArr[secondReplace-1];
+            this.myArr[secondReplace-1] = curExp;
+        } catch (Exception e) {
+            System.out.println("Выбрана часть массива вне его границ! Размер массива: " + myArr.length);
+        }
+    }
+
+
+    public ArrayList<T> arrToList () {
+        ArrayList<T> arrList = new ArrayList<T>();
+
+        for (T value: this.myArr) {
+            arrList.add(value);
+        }
+
+        return arrList;
+    }
+}

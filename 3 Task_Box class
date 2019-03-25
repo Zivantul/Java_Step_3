@@ -1,0 +1,64 @@
+package Task3_BigTask;
+
+import java.util.ArrayList;
+
+public class Box <T extends Fruit> {
+    ArrayList <T> arrList;
+
+    public Box(ArrayList<T> arrList) {
+        this.arrList = arrList;
+    }
+
+    @Override
+    public String toString() {
+        return "Box{" +
+                "arrList=" + arrList +
+                '}';
+    }
+
+    /**
+     * method, that could add fruit into the box
+     * @param addFruit
+     */
+    public void addFruitToBox (T addFruit) {
+        this.arrList.add(addFruit);
+    }
+
+    /**
+     * method, that could count a weight of the box
+     * @return
+     */
+    public float getWeight () {
+        final float weightApple = 1.0f;
+        final float weightOrange = 1.5f;
+
+
+        float sum = 0;
+
+        for (T value : this.arrList) {
+            if (value instanceof Orange) {
+                sum+=weightOrange;
+            } else {
+                sum+=weightApple;
+            }
+        }
+        return sum;
+    }
+
+    /**
+     * method to union 2 boxes
+     * @param unionToBox - the box, where we need to union fruits
+     */
+    public void unionBoxes (Box unionToBox) {
+        try {
+
+            for (int i = 0; i < this.arrList.size(); i++) {
+                unionToBox.addFruitToBox(this.arrList.get(i));
+                this.arrList.remove(i);
+                i--;
+            }
+        } catch (Exception e) {
+            System.out.println("Нельзя добавлять разные фрукты в 1 коробку! Пересыпать фрукты не удалось");
+        }
+    }
+}
