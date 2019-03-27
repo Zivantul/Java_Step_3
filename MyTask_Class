@@ -1,0 +1,241 @@
+package MyTask;
+
+import java.awt.*;
+import java.sql.*;
+import java.util.ArrayList;
+import java.util.Scanner;
+
+public class MyTask {
+    private static Connection connection = null;
+    private static PreparedStatement ps = null;
+    private static Statement statement = null;
+
+
+    public static void main(String[] args) throws  Exception {
+       initialize(); // инициализируем библиотечку
+
+
+        try (Connection connection = getConnection()) {
+                statements(connection);
+                // авторизация
+                authIn(connection);
+
+                resultSet(connection);
+
+                addUser(connection,"grisha");
+                addUser(connection,"fedya");
+                addUser(connection,"misha");
+                resultSet(connection);
+
+                transactions(connection);
+                resultSet(connection);
+
+                updateNickName(connection, "fedya", "patricia");
+                resultSet(connection);
+            }
+    }
+
+    /**
+     * Инициализируем бибилиотеку
+     * @throws ClassNotFoundException
+     */
+    private static void initialize () throws ClassNotFoundException  {
+        Class.forName("org.sqlite.JDBC");
+    }
+
+    /**
+     * создаем подключение
+     * @return
+     * @throws SQLException
+     */
+    public static Connection getConnection() throws SQLException {
+        return DriverManager.getConnection("jdbc:sqlite:test.db");
+    }
+
+
+    /**
+     * проводим операции (создаем таблицу user)
+     * @param connection
+     * @throws SQLException
+     */
+    public static void statements(Connection connection) throws SQLException {
+        try (Statement statement = connection.createStatement()) {
+            statement.execute("create table user(" +
+                    "id integer primary key , " +   //not null primary key auto_increment - выдает ошибку для sqlite
+                    "name varchar(100));");
+
+            statement.execute("insert into user(name) values('borya'),('petya')");
+        }
+    }
+
+    /**
+     * Метод добавляет пользователя в таблицу
+     * @param connection
+     * @throws SQLException
+     */
+    public static void addUser (Connection connection, String nickName) throws SQLException {
+        // собираем существующие имена в базе
+        ArrayList arrList = new ArrayList<String>();
+        arrList = getAllNicks(connection);
+
+        // проверяем зарегистрирован ли уже пользователь с таким именем
+        if (!arrList.contains(nickName.toLowerCase())) {
+            try (PreparedStatement statement = connection
+                    .prepareStatement("insert into user(id,name) values(?,?)")) {
+
+                statement.setInt(1, arrList.size()+1);
+                statement.setString(2, nickName);
+                statement.executeUpdate();
+            }
+
+        } else {
+            System.out.println(nickName + " have been already created! Enter another nickname!");
+        }
+    }
+
+
+    /**
+     * выводит таблицу пользователей в консоль
+     * @param connection
+     * @throws SQLException
+     */
+    public static void resultSet(Connection connection) throws SQLException {
+        try (Statement statement = connection.createStatement()) {
+            ResultSet rs = statement.executeQuery("select * from user");
+            while (rs.next()) {
+                System.out.println(rs.getInt("id") + " : " + rs.getString("name"));
+            }
+            System.out.println("----------------");
+        }
+    }
+
+
+    /**
+     * Обновление информации в таблице
+     * @param connection
+     * @throws SQLException
+     */
+    public static void transactions(Connection connection) throws SQLException {
+        try (Statement statement = connection.createStatement()) {
+
+            connection.setAutoCommit(false);
+
+            try {
+                statement.execute("insert into user(name) values('kesha')");
+                connection.commit();
+            } catch (SQLException e) {
+                connection.rollback();
+            }
+
+            connection.setAutoCommit(true);
+        }
+    }
+
+    /**
+     * метод для авторизации пользователя (по нику).
+     * Если ник уже есть - авторизация, если нет - добавляет пользователя
+     * @param connection
+     * @return
+     * @throws SQLException
+     */
+    public static boolean authIn (Connection connection) throws SQLException {
+        boolean authStatus = false;
+
+        String curUserName = "";
+        curUserName = askUserName().toLowerCase().replace(" ","");
+
+        ArrayList arrList = new ArrayList<String>();
+        arrList = getAllNicks(connection);
+        //System.out.println(arrList);
+
+        if (arrList.contains(curUserName)) {
+            System.out.println("Welcome, " + curUserName + "!");
+        } else {
+            addUser(connection,curUserName);
+            System.out.println("Your nick was created, " + curUserName + ". Please, try to enter again");
+        }
+
+        // замена ника: проверили? нашли айди и по этому айди апдейтнули
+
+        return authStatus;
+    }
+
+
+    /**
+     * Метод переводит все ники пользователей в лист
+     * @param connection
+     * @return
+     * @throws SQLException
+     */
+    private static ArrayList <String> getAllNicks (Connection connection) throws SQLException {
+        ArrayList arrList = new ArrayList<String>();
+
+        try (Statement statement = connection.createStatement()) {
+            ResultSet rs = statement.executeQuery("select name from user");
+
+            while (rs.next()) {
+                arrList.add(rs.getString("name"));
+            }
+        }
+
+
+        return arrList;
+    }
+
+
+    /**
+     * Метод запрашивает имя у пользователя
+     * @return
+     */
+    private static String askUserName () {
+        String curUserName = "";
+
+        try {
+            Scanner sc = new Scanner(System.in);
+            System.out.println("Input your nickname:");
+            curUserName = sc.nextLine();
+        } catch (Exception e) {
+            System.out.println("Not good nickname! ");
+        } finally {
+            return curUserName;
+        }
+    }
+
+    /**
+     * Метод для замены ника в базе
+     * @param connection
+     * @param oldNickName
+     * @param newNickName
+     * @throws SQLException
+     */
+    private static void updateNickName (Connection connection,
+                                        String oldNickName,
+                                        String newNickName) throws SQLException
+    {
+        int curIndex = 0;
+        // собираем в Лист все ники из базы
+        ArrayList arrList = new ArrayList<String>();
+        arrList = getAllNicks(connection);
+
+        // Находим индекс текущего ника в базе
+        for (int i = 0; i < arrList.size(); i++) {
+            //String curNick = arrList.get(i).toString();
+            if (arrList.get(i).equals(oldNickName)) {
+                curIndex = i + 1;
+                break;
+            }
+        }
+
+        if (curIndex != 0) {
+            // делаем апдейт в базе
+            try (PreparedStatement statement = connection
+                    .prepareStatement("UPDATE user SET name = ? WHERE id = ?")) {
+                statement.setString(1, newNickName);
+                statement.setInt(2, curIndex);
+                statement.executeUpdate();
+            }
+        } else {
+            System.out.println("Старый никнейм: " + oldNickName + " - не найден! Обновление не произведено!");
+        }
+    }
+}
