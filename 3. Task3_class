@@ -1,0 +1,31 @@
+package ru.geekbrains.lesson6.testing;
+
+public class Task3 {
+    /**
+     * Задание 3:
+     * Написать метод, который проверяет состав массива из чисел 1 и 4. Если в нем нет хоть одной четверки или единицы,
+     * то метод вернет false; Написать набор тестов для этого метода (по 3-4 варианта входных данных).
+     */
+
+    public boolean checkOneFour (Integer [] searchArr) {
+        boolean check = false;
+        int count1 = 0;
+        int count4 = 0;
+
+        for (int i = 0; i < searchArr.length; i++) {
+            if (searchArr[i] == 1) {
+                count1++;
+            } else if (searchArr[i] == 4) {
+                count4++;
+            }
+        }
+
+        if (count1 != 0 && count4 != 0) {
+            check = true;
+        } else {
+            check = false;
+        }
+
+        return check;
+    }
+}
