@@ -1,0 +1,59 @@
+package ru.geekbrains.lesson6.testing;
+
+import org.junit.After;
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
+
+import java.util.Arrays;
+import java.util.Collection;
+
+import static org.junit.Assert.*;
+
+@RunWith(value = Parameterized.class)
+public class Task3Test {
+        private static Task3 tsk3 = null;
+        private static boolean res = true;
+        private static Integer[] searchArr;
+
+        public Task3Test(Integer[] searchArr) {
+            this.searchArr = searchArr;
+        }
+
+        @Before
+        public void setUp() {
+            tsk3 = new Task3();
+            System.out.println("init suit");
+        }
+
+        @Parameterized.Parameters
+        public static Collection testParameters() {
+            Integer [] test1 = {1, 4, 4, 1, 0, 1};
+            Integer [] test2 = {0, 2, 3, 4, 0, 4, 3, 9};
+            Integer [] test3 = {0, 2, 3, 4, 1, 4, 3, 9};
+            Integer [] test4 = {};
+
+
+            return Arrays.asList(
+                    new Object[][]{
+                            {test1},
+                            {test2},
+                            {test3},
+                            {test4}
+                    }
+            );
+        }
+
+        @Test
+        public void testTask2() {
+            Assert.assertEquals(res, tsk3.checkOneFour(searchArr));
+        }
+
+        @After
+        public void tearDown() throws Exception {
+            tsk3 = null;
+        }
+
+    }

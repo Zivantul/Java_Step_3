@@ -1,0 +1,29 @@
+package server;
+
+import java.util.logging.FileHandler;
+import java.util.logging.Handler;
+import java.util.logging.Level;
+import java.util.logging.SimpleFormatter;
+
+public class LogHandler {
+    String fileAddress;
+
+    public LogHandler(String fileAddress) {
+        this.fileAddress = fileAddress;
+    }
+
+    public Handler getLogFileHandler () {
+        Handler logHandler = null;
+        try {
+            logHandler = new FileHandler(fileAddress);
+            logHandler.setFormatter(new SimpleFormatter());
+            logHandler.setLevel(Level.INFO);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return logHandler;
+    }
+
+}

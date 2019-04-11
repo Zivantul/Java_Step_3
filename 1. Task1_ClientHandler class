@@ -1,0 +1,108 @@
+package server;
+
+import java.io.PrintWriter;
+import java.net.Socket;
+import java.util.Scanner;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
+/**
+ * @author ilnaz-92@yandex.ru
+ * Created on 2019-03-04
+ */
+public class ClientHandler implements Runnable
+{
+  private Socket clientSocket;
+  private Server server;
+  private PrintWriter outMsg;
+  private Scanner inMsg;
+  private static int clientCount = 0;
+  private Logger sl;
+
+
+  public ClientHandler(Socket clientSocket, Server server, Logger sl)
+  {
+    try
+    {
+      clientCount++;
+      this.clientSocket = clientSocket;
+      this.server = server;
+      this.sl = sl;
+      this.outMsg = new PrintWriter(clientSocket.getOutputStream());
+      this.inMsg = new Scanner(clientSocket.getInputStream());
+
+    }
+    catch (Exception e)
+    {
+      e.printStackTrace();
+      loggingServer(sl,"Couldn't add a client - socket troubles", 'e');
+    }
+  }
+
+  @Override
+  public void run()
+  {
+    try
+    {
+      server.notificationAllClientWithNewMessage("New client in our chat", sl);
+      server.notificationAllClientWithNewMessage("In our chat client count = " + clientCount, sl);
+
+
+      while (true)
+      {
+        if (inMsg.hasNext())
+        {
+          String clientMsg = inMsg.nextLine();
+          if (clientMsg.indexOf("QUIT") != -1)
+          {
+            break;
+          }
+          System.out.println(clientMsg);
+          server.notificationAllClientWithNewMessage(clientMsg, sl);
+        }
+      }
+
+      Thread.sleep(1000);
+    }
+    catch (Exception e)
+    {
+      e.printStackTrace();
+      loggingServer(sl,"Could't notify all clients", 'e');
+    }
+    finally
+    {
+      exitFromChat();
+    }
+
+  }
+
+  private void exitFromChat()
+  {
+    clientCount--;
+    server.notificationAllClientWithNewMessage("Client exited. In out chat = " + clientCount + " clients!", sl);
+    server.removeClient(this, sl);
+  }
+
+  public void sendMessage(String msg)
+  {
+    try
+    {
+      outMsg.println(msg);
+      outMsg.flush();
+      loggingServer(sl,msg, 'i');
+    }
+    catch (Exception e)
+    {
+      e.printStackTrace();
+      loggingServer(sl,"Couldn't send a message", 'e');
+    }
+  }
+
+  public void loggingServer (Logger sl, String text, char typeOfMessage) {
+    if (typeOfMessage == 'e') {
+      sl.log(Level.WARNING, text);
+    } else {
+      sl.log(Level.INFO, text);
+    }
+  }
+}
