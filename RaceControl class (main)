@@ -1,0 +1,44 @@
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.Semaphore;
+
+public class RaceControl {
+    public static final int CARS_COUNT = 4;
+    // инициализируем счетчики для этапов старт и финиш
+    public static final CountDownLatch startLine = new CountDownLatch(CARS_COUNT+1);
+    public static final CountDownLatch finishLine = new CountDownLatch(CARS_COUNT);
+    // инициализируем семафор для ограничения потоков на этапе Тоннеля
+    public static final Semaphore tunnel = new Semaphore(CARS_COUNT/2, true);
+    public static String winner = null;
+
+
+    public static void main(String[] args) {
+        System.out.println("ВАЖНОЕ ОБЪЯВЛЕНИЕ >>> Подготовка!!!");
+
+        Race race = new Race(new Road(60), new Tunnel(), new Road(40));
+        Car[] cars = new Car[CARS_COUNT];
+
+        for (int i = 0; i < cars.length; i++) {
+            cars[i] = new Car(race, 20 + (int) (Math.random() * 10));
+        }
+
+        for (int i = 0; i < cars.length; i++) {
+                Thread t = new Thread(cars[i]);
+                t.start();
+        }
+
+        while (startLine.getCount() > 1) {
+            try {
+                Thread.sleep(100 + (int) (Math.random() * 30));
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+
+        System.out.println("ВАЖНОЕ ОБЪЯВЛЕНИЕ >>> Гонка началась!!!");
+        startLine.countDown();
+
+        while (finishLine.getCount() > 0);
+        System.out.println("ВАЖНОЕ ОБЪЯВЛЕНИЕ >>> Гонка закончилась!!! Победил: " + winner);
+
+    }
+}
