@@ -1,0 +1,18 @@
+package Tasks_1and2;
+
+public class TasksStarter {
+    public static void main(String[] args) {
+        Integer[] intArray = {1, 2, 3, 4, 5};
+
+        MyArray<Integer> ma = new MyArray<Integer>(intArray);
+
+        // for task 1
+        ma.printArray();
+        System.out.println();
+        ma.changeArr(2,5);
+        ma.printArray();
+
+        // for task 2
+        System.out.println(ma.arrToList());
+    }
+}
