@@ -1,0 +1,94 @@
+package MyPlay;
+
+public class App2 {
+    // решение на wait + notifyall
+
+    private static final Object monitor = new Object();
+    private static char nextChar = 'A';
+    private static int iterA = 0;
+    private static int iterB = 0;
+    private static int iterC = 0;
+
+    public static void main(String[] args) {
+        int iterations = 25;
+
+        System.out.println("Let's start: ");
+
+        Thread th1 = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                while (iterA <= iterations) {
+                    printChar ('A');
+                }
+            }
+        });
+
+        Thread th2 = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                while (iterB <= iterations) {
+                    printChar ('B');
+                }
+            }
+        });
+
+        Thread th3 = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                while (iterC <= iterations) {
+                    printChar ('C');
+                }
+            }
+        });
+
+
+
+        th1.start();
+        th2.start();
+        th3.start();
+
+    }
+
+    public static void printChar (char ch) {
+        synchronized (monitor) {
+            try {
+                //System.out.println("пришел поток с " + ch + " а некст чар - " + nextChar);
+                if (nextChar != ch) {
+                    //System.out.println(Thread.currentThread().getName() + " is waiting");
+                    monitor.wait();
+                } else {
+                    System.out.println(ch);
+                    addIterationToCurrentChar(ch);
+                    changeCurrentChar(ch);
+                }
+
+                monitor.notifyAll();
+
+            } catch (InterruptedException e) {
+                System.out.println(e.getStackTrace());
+            }
+        }
+    }
+
+
+    public static void changeCurrentChar (char curChar) {
+        if (curChar == 'A') {
+            nextChar = 'B';
+        } else if (curChar == 'B') {
+            nextChar = 'C';
+        } else {
+            nextChar = 'A';
+        }
+        //System.out.println("cur - " + curChar + " next char - " + nextChar);
+    }
+
+    public static void addIterationToCurrentChar (char curChar) {
+        if (curChar == 'A') {
+            iterA ++;
+        } else if (curChar == 'B') {
+            iterB++;
+        } else {
+            iterC++;
+        }
+    }
+}
